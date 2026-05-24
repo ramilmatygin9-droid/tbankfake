@@ -3,202 +3,175 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Interactive Mockup</title>
+    <title>Генератор номеров | Склад</title>
     <style>
-        :root {
-            --bg-color: #000;
-            --sheet-bg: #1c1c1e;
-            --text-main: #fff;
-            --accent-blue: #007aff;
-        }
-
-        body {
-            margin: 0;
-            background: var(--bg-color);
-            font-family: -apple-system, sans-serif;
-            overflow: hidden; /* Чтобы не скроллился сам экран телефона */
-        }
-
-        .phone-mockup {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            max-width: 430px;
-            margin: 0 auto;
-            background: url('photo_2026-05-05_15-06-07.jpg') no-repeat center top;
-            background-size: contain;
-        }
-
-        /* Зона поиска поверх изображения */
-        .search-trigger {
-            position: absolute;
-            top: 15%; /* Подгоните под область "Поиск" на вашем фото */
-            left: 5%;
-            width: 90%;
-            height: 45px;
-        }
-
-        #realSearch {
-            width: 100%;
-            height: 100%;
-            background: rgba(28, 28, 30, 0.8);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            padding: 0 15px;
-            box-sizing: border-box;
-            outline: none;
-        }
-
-        /* Зона клика "Мой счет" */
-        .account-trigger {
-            position: absolute;
-            top: 61%; /* Подгоните под блок счета на вашем фото */
-            left: 5%;
-            width: 90%;
-            height: 80px;
-            cursor: pointer;
-        }
-
-        /* Плавное меню (Bottom Sheet) */
-        .bottom-sheet {
-            position: fixed;
-            bottom: -100%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 430px;
-            height: 85vh;
-            background: var(--sheet-bg);
-            border-radius: 20px 20px 0 0;
-            transition: bottom 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
-            z-index: 100;
-            color: white;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .bottom-sheet.open {
-            bottom: 0;
-        }
-
-        .handle {
-            width: 40px;
-            height: 5px;
-            background: #3a3a3c;
-            border-radius: 10px;
-            margin: 12px auto;
-        }
-
-        .sheet-content {
-            padding: 20px;
-            overflow-y: auto;
-            flex-grow: 1;
-        }
-
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            display: none;
-            z-index: 90;
-        }
-
-        /* Стили контента внутри меню */
-        .section { margin-bottom: 25px; border-bottom: 1px solid #2c2c2e; padding-bottom: 15px; }
-        .row { display: flex; justify-content: space-between; margin: 12px 0; }
-        .label { color: #8e8e93; }
-        .qr-placeholder { background: white; width: 150px; height: 150px; margin: 10px auto; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: black; font-weight: bold; }
-        .btn-more { color: var(--accent-blue); font-weight: 600; cursor: pointer; }
+        body { background: #0a0a0c; color: white; font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; overflow-x: hidden; }
+        .header-panel { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 680px; padding: 20px 0; }
+        .balance { font-size: 26px; color: #00ff00; font-weight: bold; }
+        .btn-inventory-toggle { padding: 12px 24px; background: #1e1e24; border: 2px solid #333; color: white; cursor: pointer; border-radius: 5px; }
         
-        .sub-menu { display: none; padding-top: 10px; background: #2c2c2e; border-radius: 10px; padding: 10px; margin-top: 10px; }
+        .wrapper { position: relative; width: 680px; height: 140px; margin-top: 50px; }
+        .frame-img { width: 100%; height: 100%; position: absolute; z-index: 1; pointer-events: none; }
+        #main { position: absolute; left: 10px; top: 7px; width: 500px; height: 125px; display: flex; align-items: center; justify-content: center; z-index: 2; overflow: hidden; }
+        .slot { width: 75px; height: 125px; position: relative; overflow: hidden; }
+        .track { position: absolute; top: 0; left: 0; width: 100%; }
+        .char { height: 125px; display: flex; align-items: center; justify-content: center; font-size: 95px; font-weight: 800; color: #000; line-height: 125px; }
+        
+        .region-box { position: absolute; right: 35px; top: 15px; width: 125px; height: 75px; z-index: 3; cursor: pointer; }
+        .char-reg { height: 75px; display: flex; align-items: center; justify-content: center; font-size: 55px; font-weight: 800; color: #000; }
+        .region-input-overlay { position: absolute; right: 35px; top: 15px; width: 125px; height: 75px; border: none; background: #fff; font-size: 55px; font-weight: 800; text-align: center; color: #000; outline: none; z-index: 4; display: none; border-radius: 5px; }
+        
+        .controls-container { display: flex; flex-direction: column; gap: 15px; margin-top: 40px; width: 100%; max-width: 500px; align-items: center; }
+        .action-popup { display: none; flex-direction: column; gap: 10px; width: 100%; }
+        .btn-action { padding: 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+        .btn-keep { background: #00ff66; color: #000; }
+        .btn-action:disabled { background: #444; color: #888; cursor: not-allowed; }
+
+        .inventory-drawer { position: fixed; top: 0; right: -420px; width: 380px; height: 100vh; background: #101014; transition: 0.3s; z-index: 10; display: flex; flex-direction: column; }
+        .inventory-drawer.active { right: 0; }
+        .inventory-grid { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; align-items: center; }
+        .inv-item { background: #1a1a1a; padding: 15px; border: 1px solid #333; border-radius: 6px; display: flex; flex-direction: column; align-items: center; }
+        
+        .inv-plate-box { position: relative; width: 204px; height: 42px; overflow: hidden; border-radius: 4px; margin-bottom: 10px; }
+        .inv-plate-scaled { position: absolute; top: 0; left: 0; width: 680px; height: 140px; transform: scale(0.3); transform-origin: top left; }
+        .mini-main { position: absolute; left: 10px; top: 7px; width: 500px; height: 125px; display: flex; align-items: center; justify-content: center; }
+        .mini-char { width: 75px; height: 125px; display: flex; align-items: center; justify-content: center; font-size: 95px; font-weight: 800; color: #000; }
+        .mini-reg { position: absolute; right: 40px; top: 15px; width: 120px; height: 70px; font-size: 60px; font-weight: 800; text-align: center; color: #000; line-height: 70px; }
+        
+        .btns { display: flex; gap: 6px; width: 100%; justify-content: center; }
+        .btns button { cursor: pointer; border: none; padding: 6px 10px; font-size: 11px; font-weight: bold; border-radius: 3px; }
     </style>
 </head>
 <body>
 
-<div class="phone-mockup">
-    <!-- Поле поиска -->
-    <div class="search-trigger">
-        <input type="text" id="realSearch" placeholder="Поиск по операциям...">
+    <div class="header-panel">
+        <div class="balance">БАЛАНС: <span id="balance">6000</span> ₽</div>
+        <button class="btn-inventory-toggle" onclick="document.getElementById('drawer').classList.add('active')">ИНВЕНТАРЬ</button>
     </div>
 
-    <!-- Кликабельная зона счета -->
-    <div class="account-trigger" onclick="openSheet()"></div>
-</div>
+    <div class="wrapper">
+        <img src="https://cdn.nomerhub.ru/numbers_templates/car_default.svg" class="frame-img">
+        <div id="main"></div>
+        <div class="region-box" id="reg-box-view" onclick="showRegionInput()"><div class="char-reg" id="reg-static-label">99</div></div>
+        <input type="text" id="reg-input" class="region-input-overlay" maxlength="3" onkeydown="if(event.key==='Enter') saveRegion()" onblur="saveRegion()">
+    </div>
 
-<!-- Затемнение фона -->
-<div class="overlay" id="overlay" onclick="closeSheet()"></div>
-
-<!-- Выезжающее меню -->
-<div class="bottom-sheet" id="sheet">
-    <div class="handle"></div>
-    <div class="sheet-content">
-        <h2>Мой счет</h2>
-        
-        <div class="section">
-            <div class="row"><span>Карта *2686</span> <strong>5,41 ₽</strong></div>
-            <div class="row"><span class="label">Баллы лояльности</span> <span>124 б.</span></div>
+    <div class="controls-container">
+        <div class="sub-controls" id="sub-panel" style="display:flex; gap:10px; width:100%;">
+            <button class="btn-action" id="btn-spin-l" style="flex:1; background:#2c303b; color:white;" onclick="spinElements([0, 4, 5])">БУКВЫ (3000₽)</button>
+            <button class="btn-action" id="btn-spin-d" style="flex:1; background:#2c303b; color:white;" onclick="spinElements([1, 2, 3])">ЦИФРЫ (3000₽)</button>
         </div>
-
-        <div class="section">
-            <h3>Операции за май</h3>
-            <div class="row"><span>Супермаркеты</span> <span>-850 ₽</span></div>
-            <div class="row"><span>Аптеки</span> <span>-309 ₽</span></div>
-        </div>
-
-        <div class="section" style="text-align: center;">
-            <h3>QR-код для пополнения</h3>
-            <div class="qr-placeholder">QR CODE</div>
-            <p class="label">Покажите этот код для перевода</p>
-        </div>
-
-        <div class="section">
-            <div class="btn-more" onclick="toggleExtra()">Дополнительно ▼</div>
-            <div id="extraMenu" class="sub-menu">
-                <div class="row"><span class="label">Лимит на переводы</span> <span>150 000 ₽</span></div>
-                <div class="row"><span class="label">Лимит на снятие</span> <span>50 000 ₽</span></div>
-                <div class="row"><span class="label">Тариф</span> <span>Black Premium</span></div>
-                <div class="row"><span class="label">Реквизиты счета</span> <span style="color:var(--accent-blue)">Копировать</span></div>
+        <div class="action-popup" id="action-block">
+            <button class="btn-action btn-keep" id="btn-keep" onclick="keepNumber()">ЗАБРАТЬ В ИНВЕНТАРЬ</button>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-action" id="btn-continue" style="flex:1; background:#2aa2ff; color:white;" onclick="resetControlPanel(false)">ПРОДОЛЖИТЬ</button>
+                <button class="btn-action" style="flex:1; background:#2a2a2a; color:#ff4444;" onclick="resetControlPanel(true)">ВЫБРОСИТЬ</button>
             </div>
         </div>
-        
-        <button onclick="closeSheet()" style="width:100%; padding:15px; border-radius:12px; border:none; background:#2c2c2e; color:white; font-size:16px;">Закрыть</button>
     </div>
-</div>
+    
+    <div class="inventory-drawer" id="drawer">
+        <div style="padding:20px; display:flex; justify-content:space-between;">Ваши Номера <button style="background:none; border:none; color:white; cursor:pointer;" onclick="document.getElementById('drawer').classList.remove('active')">&times;</button></div>
+        <div class="inventory-grid" id="inventory"></div>
+    </div>
 
-<script>
-    const sheet = document.getElementById('sheet');
-    const overlay = document.getElementById('overlay');
-    const extraMenu = document.getElementById('extraMenu');
+    <script>
+        let balance = 6000;
+        const COST = 3000; // Цена действия
 
-    function openSheet() {
-        sheet.classList.add('open');
-        overlay.style.display = 'block';
-    }
-
-    function closeSheet() {
-        sheet.classList.remove('open');
-        overlay.style.display = 'none';
-    }
-
-    function toggleExtra() {
-        if (extraMenu.style.display === 'block') {
-            extraMenu.style.display = 'none';
-        } else {
-            extraMenu.style.display = 'block';
+        const L = ['А', 'В', 'Е', 'К', 'М', 'Н', 'О', 'Р', 'С', 'Т', 'У', 'Х'];
+        const D = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        let currentValues = ['?', '?', '?', '?', '?', '?'];
+        
+        function updateUI() {
+            document.getElementById('balance').innerText = balance.toLocaleString();
+            const tooPoor = balance < COST;
+            document.getElementById('btn-spin-l').disabled = tooPoor;
+            document.getElementById('btn-spin-d').disabled = tooPoor;
+            document.getElementById('btn-continue').disabled = tooPoor;
+            document.getElementById('btn-keep').disabled = currentValues.includes('?');
         }
-    }
 
-    // Имитация поиска
-    document.getElementById('realSearch').addEventListener('input', (e) => {
-        console.log("Ищем:", e.target.value);
-        // Здесь можно добавить фильтрацию списка операций
-    });
-</script>
+        function showRegionInput() {
+            document.getElementById('reg-box-view').style.display = 'none';
+            const input = document.getElementById('reg-input');
+            input.style.display = 'block';
+            input.value = document.getElementById('reg-static-label').innerText;
+            input.focus();
+        }
 
+        function saveRegion() {
+            const input = document.getElementById('reg-input');
+            if (input.style.display === 'none') return;
+            if (balance >= COST) {
+                balance -= COST;
+                document.getElementById('reg-static-label').innerText = input.value || "99";
+                updateUI();
+            } else { alert("Недостаточно средств (нужно 3000₽)!"); }
+            input.style.display = 'none';
+            document.getElementById('reg-box-view').style.display = 'block';
+        }
+
+        const main = document.getElementById('main');
+        [0,1,2,3,4,5].forEach(() => {
+            main.innerHTML += `<div class="slot"><div class="track"><div class="char">?</div></div></div>`;
+        });
+
+        function spinElements(indices) {
+            if (balance < COST) return;
+            balance -= COST;
+            updateUI();
+            document.getElementById('sub-panel').style.display = 'none';
+            
+            indices.forEach(i => {
+                const track = document.querySelectorAll('.track')[i];
+                const pool = (i == 0 || i >= 4) ? L : D;
+                const char = pool[Math.floor(Math.random() * pool.length)];
+                currentValues[i] = char;
+                let html = '';
+                for(let j=0; j<15; j++) html += `<div class="char">${pool[Math.floor(Math.random()*pool.length)]}</div>`;
+                html += `<div class="char">${char}</div>`;
+                track.innerHTML = html;
+                track.style.transition = `transform 1.5s cubic-bezier(0.1, 0.5, 0.2, 1)`;
+                track.style.transform = `translateY(-${15 * 125}px)`;
+            });
+            setTimeout(() => { updateUI(); document.getElementById('action-block').style.display = 'flex'; }, 1600);
+        }
+
+        function keepNumber() {
+            const inv = document.getElementById('inventory');
+            const item = document.createElement('div'); item.className = 'inv-item';
+            const market = Math.round((Math.random() * 2985000 + 15000) / 1000) * 1000;
+            const gov = Math.round((Math.random() * 499500 + 500) / 100) * 100;
+
+            item.innerHTML = `
+                <div class="inv-plate-box">
+                    <div class="inv-plate-scaled">
+                        <img src="https://cdn.nomerhub.ru/numbers_templates/car_default.svg" style="width:100%; height:100%;">
+                        <div class="mini-main">${currentValues.map(c => `<div class="mini-char">${c}</div>`).join('')}</div>
+                        <div class="mini-reg">${document.getElementById('reg-static-label').innerText}</div>
+                    </div>
+                </div>
+                <div class="btns">
+                    <button style="background:#d80000; color:white;" onclick="sell(this, ${market})">Рынок (${market.toLocaleString()}₽)</button>
+                    <button style="background:#555; color:white;" onclick="sell(this, ${gov})">ГИБДД (${gov.toLocaleString()}₽)</button>
+                </div>`;
+            inv.prepend(item);
+            resetControlPanel(true);
+        }
+
+        function sell(btn, amount) { balance += amount; updateUI(); btn.closest('.inv-item').remove(); }
+
+        function resetControlPanel(clear) {
+            document.getElementById('action-block').style.display = 'none';
+            document.getElementById('sub-panel').style.display = 'flex';
+            if(clear) {
+                currentValues = ['?', '?', '?', '?', '?', '?'];
+                document.querySelectorAll('.track').forEach(t => { t.style.transform = 'translateY(0)'; t.innerHTML = `<div class="char">?</div>`; });
+            }
+            updateUI();
+        }
+        updateUI();
+    </script>
 </body>
 </html>
